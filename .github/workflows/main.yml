@@ -21,4 +21,4 @@ jobs:
          bash login.sh
          
     - name: MacOS System running...
-      uses: mxschmitt/action-tmate@v2
+      uses: mxschmitt/action-tmate@v3
