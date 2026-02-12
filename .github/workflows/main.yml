@@ -11,19 +11,25 @@ jobs:
       env:
         TAILSCALE_KEY: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
-        # Install and Start Tailscale
         brew install tailscale
-        sudo tailscaled > /dev/null 2>&1 &
-        sleep 5
-        sudo tailscale up --authkey "$TAILSCALE_KEY" --hostname="GitHub-Mac"
+        sudo /usr/local/sbin/tailscaled > /dev/null 2>&1 &
+        sleep 10
+        sudo tailscale up --authkey "$TAILSCALE_KEY" --hostname="GitHub-Mac" --accept-routes
         
-    - name: Enable MacOS Screen Sharing
+    - name: Force Enable Screen Sharing & Firewall
       run: |
-        # This command turns on the VNC server and sets the password to 'P@ssw0rd!'
+        # 1. Open the MacOS Firewall for VNC (Port 5900)
+        sudo /usr/libexec/ApplicationFirewall/socketfilterproxy --add /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent
+        sudo /usr/libexec/ApplicationFirewall/socketfilterproxy --setglobalstate off
+
+        # 2. Configure and Start Screen Sharing with password 'P@ssw0rd!'
         sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
         -activate -configure -access -on \
         -clientopts -setvncpassword -vncpassword "P@ssw0rd!" \
         -restart -agent -privs -all
+        
+        # 3. Verify if the port is actually listening
+        netstat -an | grep 5900
           
     - name: MacOS System running...
       uses: mxschmitt/action-tmate@v3
