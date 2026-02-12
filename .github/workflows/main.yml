@@ -11,15 +11,19 @@ jobs:
       env:
         TAILSCALE_KEY: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
-        # Install Tailscale using Homebrew
+        # Install and Start Tailscale
         brew install tailscale
-        
-        # Start the Tailscale background service
         sudo tailscaled > /dev/null 2>&1 &
         sleep 5
-        
-        # Log in to Tailscale
         sudo tailscale up --authkey "$TAILSCALE_KEY" --hostname="GitHub-Mac"
+        
+    - name: Enable MacOS Screen Sharing
+      run: |
+        # This command turns on the VNC server and sets the password to 'P@ssw0rd!'
+        sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
+        -activate -configure -access -on \
+        -clientopts -setvncpassword -vncpassword "P@ssw0rd!" \
+        -restart -agent -privs -all
           
     - name: MacOS System running...
       uses: mxschmitt/action-tmate@v3
