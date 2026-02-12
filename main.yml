@@ -7,18 +7,13 @@ jobs:
     runs-on: macos-latest
     
     steps:                 
-    - name: Enabling Remote Access
-      env:
-        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-      run: |
-          curl -s -o start.sh -L "https://raw.githubusercontent.com/JohnnyNetsec/github-vm/main/mac/start.sh"
-          chmod +x start.sh
-          bash start.sh "$NGROK_AUTH_TOKEN"
+    - name: Connect to Tailscale
+      uses: tailscale/github-action@v2
+      with:
+        # Using your existing secret variable name as requested
+        authkey: ${{ secrets.NGROK_AUTH_TOKEN }}
           
-    - name: Log In Details To VNC Server
-      run: |
-         chmod +x login.sh
-         bash login.sh
-         
     - name: MacOS System running...
-      uses: mxschmitt/action-tmate@v2
+      # Upgraded to v3 for better stability
+      uses: mxschmitt/action-tmate@v3
+      if: always()
